@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Smart App Review</string>
+    <string name="review_like_question">Вам нравится приложение?</string>
+    <string name="review_like_yes">Да</string>
+    <string name="review_like_no">Нет</string>
+
+    <string name="review_rate_question">Хотите поставить оценку в Google Play?</string>
+    <string name="review_rate_now">Оценить</string>
+    <string name="review_rate_later">Позже</string>
+    <string name="review_rate_never">Нет, спасибо</string>
+</resources>
