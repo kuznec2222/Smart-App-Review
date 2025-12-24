@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 
@@ -16,6 +17,7 @@ fun ReviewInline(
     activity: Activity,
     style: ReviewInlineStyle = DefaultReviewInlineStyle.material(),
     modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     strings: ReviewStrings = DefaultReviewStrings,
 ) {
     val scope = rememberCoroutineScope()
@@ -37,6 +39,7 @@ fun ReviewInline(
         strings = strings,
         style = style,
         modifier = modifier,
+        horizontalAlignment = horizontalAlignment,
         onAction = { action ->
             scope.launch {
                 controller.onAction(action)

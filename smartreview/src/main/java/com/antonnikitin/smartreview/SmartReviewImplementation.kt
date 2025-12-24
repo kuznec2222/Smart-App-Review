@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.google.android.play.core.review.ReviewManagerFactory
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 
 class SmartReviewImplementation(
@@ -14,9 +16,14 @@ class SmartReviewImplementation(
 
     private val appContext = context.applicationContext
     private val storage = ReviewStorage(appContext)
+    private val _willShowReview = MutableStateFlow(false)
+    override val willShowReview: StateFlow<Boolean> = _willShowReview
+    private val _isReviewActive = MutableStateFlow(false)
+    override val isReviewActive: StateFlow<Boolean> = _isReviewActive
 
     override suspend fun onAppLaunched() {
         storage.onAppLaunched(now())
+        recomputeWillShowReview()
     }
 
     override suspend fun shouldPrompt(): Boolean {
@@ -34,7 +41,9 @@ class SmartReviewImplementation(
                 append("sentiment=").append(snapshot.sentimentPositive)
             }
         )
-        return policy.shouldPrompt(snapshot, now())
+        val shouldPrompt = policy.shouldPrompt(snapshot, now())
+        _isReviewActive.value = shouldPrompt
+        return shouldPrompt
     }
 
 
@@ -44,10 +53,12 @@ class SmartReviewImplementation(
 
     override suspend fun markOptOut() {
         storage.markOptOut()
+        _isReviewActive.value = false
     }
 
     override suspend fun markPromptShown() {
         storage.markPromptShown(now())
+        _isReviewActive.value = false
     }
 
     override suspend fun markPassiveShown() {
@@ -60,24 +71,6 @@ class SmartReviewImplementation(
 
     override suspend fun requestReview(activity: Activity): Boolean {
         Log.d("SmartReview", "requestReview() called")
-
-        val snapshot = storage.snapshot()
-        Log.d(
-            "SmartReview",
-            "requestReview snapshot → " +
-                    "launchCount=${snapshot.launchCount}, " +
-                    "promptCount=${snapshot.promptCount}, " +
-                    "lastPromptAt=${snapshot.lastPromptAt}, " +
-                    "optOut=${snapshot.optOut}, " +
-                    "passiveShownCount=${snapshot.passiveShownCount}, " +
-                    "sentiment=${snapshot.sentimentPositive}"
-        )
-
-        if (!policy.shouldPrompt(snapshot, now())) {
-            Log.d("SmartReview", "requestReview aborted → policy.shouldPrompt=false")
-            return false
-        }
-
         return try {
             Log.d("SmartReview", "requestReview → requesting ReviewManager")
 
@@ -92,6 +85,7 @@ class SmartReviewImplementation(
             Log.d("SmartReview", "requestReview SUCCESS → applying optOut + cooldown")
             storage.markOptOut()
             storage.markPromptShown(now())
+            _isReviewActive.value = false
             true
         } catch (e: Exception) {
             Log.d(
@@ -105,4 +99,9 @@ class SmartReviewImplementation(
     }
 
     private fun now(): Long = System.currentTimeMillis()
+
+    private suspend fun recomputeWillShowReview() {
+        val snapshot = storage.snapshot()
+        _willShowReview.value = policy.shouldPrompt(snapshot, now())
+    }
 }

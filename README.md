@@ -35,7 +35,7 @@ dependencyResolutionManagement {
 }
 
 dependencies {
-    implementation("com.github.kuznec2222:Smart-App-Review:v1.0.2")
+    implementation("com.github.kuznec2222:Smart-App-Review:v1.1.0")
 }
 ```
 

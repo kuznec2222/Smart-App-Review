@@ -1,6 +1,7 @@
 package com.antonnikitin.smartreview
 
 import android.app.Activity
+import kotlinx.coroutines.flow.StateFlow
 
 interface ReviewPrompter {
 
@@ -58,4 +59,18 @@ interface ReviewPrompter {
      * (Google may still decide not to show the dialog).
      */
     suspend fun requestReview(activity: Activity): Boolean
+
+    /**
+     * Emits true when the review prompt
+     * should be shown in the UI slot.
+     */
+    val willShowReview: StateFlow<Boolean>
+
+    /**
+     * Indicates whether the review prompt should currently be shown.
+     *
+     * This is a decision flag, not a reflection of the actual visibility
+     * of the Google In-App Review dialog.
+     */
+    val isReviewActive: StateFlow<Boolean>
 }

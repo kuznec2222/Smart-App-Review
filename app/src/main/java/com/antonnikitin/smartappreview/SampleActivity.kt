@@ -5,10 +5,13 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +40,8 @@ class SampleActivity : ComponentActivity() {
             context = this,
             config = SmartReviewConfig(
                 policy = ReviewPolicyConfig(
-                    minDaysSinceFirstLaunch = 0.days
+                    minDaysSinceFirstLaunch = 0.days,
+                    maxPassiveShows = 100
                 )
             )
         )
@@ -62,6 +66,9 @@ fun SampleScreen(
     reviewPrompter: ReviewPrompter,
     activity: Activity
 ) {
+    val willShowReview by reviewPrompter.willShowReview.collectAsState()
+    val isReviewActive by reviewPrompter.isReviewActive.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,20 +85,36 @@ fun SampleScreen(
             titleTextStyle = MaterialTheme.typography.headlineSmall,
             primaryButton = ReviewButtonStyle(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Green),
-                textStyle = MaterialTheme.typography.labelLarge
+                textStyle = MaterialTheme.typography.labelLarge,
+                border = null
             ),
             secondaryButton = ReviewButtonStyle(
                 colors = ButtonDefaults.outlinedButtonColors(),
-                textStyle = MaterialTheme.typography.labelMedium
+                textStyle = MaterialTheme.typography.labelMedium,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline
+                )
             )
         )
+        when {
+            willShowReview -> {
+                ReviewInline(
+                    reviewPrompter = reviewPrompter,
+                    activity = activity,
+                    strings = AppReviewStrings(LocalContext.current),
+                    style = customStyle,
+                    horizontalAlignment = Alignment.End
+                )
+            }
+            else -> {
+                Text("Admob Banner, etc.")
+            }
+        }
 
-        ReviewInline(
-            reviewPrompter = reviewPrompter,
-            activity = activity,
-            strings = AppReviewStrings(LocalContext.current),
-            style = customStyle
-        )
+        HorizontalDivider()
+
+        Text("Review is active: $isReviewActive")
 
         HorizontalDivider()
 

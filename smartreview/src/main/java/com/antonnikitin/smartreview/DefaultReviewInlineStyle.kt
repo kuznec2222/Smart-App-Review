@@ -1,5 +1,6 @@
 package com.antonnikitin.smartreview
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -19,11 +20,16 @@ object DefaultReviewInlineStyle {
             titleTextStyle = MaterialTheme.typography.titleMedium,
             primaryButton = ReviewButtonStyle(
                 colors = ButtonDefaults.buttonColors(),
-                textStyle = MaterialTheme.typography.labelLarge
+                textStyle = MaterialTheme.typography.labelLarge,
+                border = null
             ),
             secondaryButton = ReviewButtonStyle(
                 colors = ButtonDefaults.outlinedButtonColors(),
-                textStyle = MaterialTheme.typography.labelLarge
+                textStyle = MaterialTheme.typography.labelLarge,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline
+                )
             ),
             spacing = 12.dp
         )
