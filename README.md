@@ -1,5 +1,3 @@
-
-
 # Smart App Review
 
 **Smart App Review** is a lightweight Android library that displays an **inline in‑app review prompt** based on real user behavior instead of intrusive dialogs.
@@ -23,7 +21,23 @@ The goal is to ask for a Google Play review **at the right moment**, without bre
 
 ## 📦 Installation
 
-*(Distribution method TBD)*
+The library is distributed via **JitPack**.
+
+In your **settings.gradle** or **settings.gradle.kts**:
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+
+dependencies {
+    implementation("com.github.kuznec2222:Smart-App-Review:v1.0.2")
+}
+```
 
 ---
 
@@ -32,7 +46,15 @@ The goal is to ask for a Google Play review **at the right moment**, without bre
 ### 1️⃣ Create ReviewPrompter
 
 ```kotlin
-val reviewPrompter = SmartReviewImplementation(context)
+val reviewPrompter = SmartReviewImplementation(
+    context = context,
+    config = SmartReviewConfig(
+        policy = ReviewPolicyConfig(
+            minLaunchCount = 3,
+            cooldown = 14.days
+        )
+    )
+)
 
 lifecycleScope.launch {
     reviewPrompter.onAppLaunched()
@@ -40,6 +62,44 @@ lifecycleScope.launch {
 ```
 
 Call `onAppLaunched()` once per app start.
+
+---
+
+## ⚙️ Configuration
+
+All review behavior is controlled via `SmartReviewConfig`.
+
+Each policy parameter is optional and has a reasonable default value.
+
+```kotlin
+SmartReviewImplementation(
+    context = context,
+    config = SmartReviewConfig(
+        policy = ReviewPolicyConfig(
+            minLaunchCount = 3,
+            minDaysSinceFirstLaunch = 2.days,
+            cooldown = 14.days,
+            maxPrompts = 10,
+            maxPassiveShows = 2
+        )
+    )
+)
+```
+
+You can override only the parameters you need:
+
+```kotlin
+SmartReviewImplementation(
+    context = context,
+    config = SmartReviewConfig(
+        policy = ReviewPolicyConfig(
+            cooldown = 30.days
+        )
+    )
+)
+```
+
+If no configuration is provided, all default values are used.
 
 ---
 
@@ -124,6 +184,8 @@ This makes localization explicit and SDK‑friendly.
 ---
 
 ## 🧠 Review Flow Logic
+
+The flow is controlled by `ReviewPolicyConfig` defaults unless overridden.
 
 Default behavior:
 

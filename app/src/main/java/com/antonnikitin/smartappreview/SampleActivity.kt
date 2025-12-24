@@ -19,18 +19,28 @@ import com.antonnikitin.smartreview.ReviewInline
 import com.antonnikitin.smartreview.ReviewInlineBlock
 import com.antonnikitin.smartreview.ReviewInlineController
 import com.antonnikitin.smartreview.ReviewInlineStyle
+import com.antonnikitin.smartreview.ReviewPolicyConfig
 import com.antonnikitin.smartreview.ReviewPrompter
 import com.antonnikitin.smartreview.ReviewStrings
 import com.antonnikitin.smartreview.ReviewUiAction
+import com.antonnikitin.smartreview.SmartReviewConfig
 import com.antonnikitin.smartreview.SmartReviewImplementation
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.days
 
 class SampleActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val reviewPrompter = SmartReviewImplementation(this)
+        val reviewPrompter = SmartReviewImplementation(
+            context = this,
+            config = SmartReviewConfig(
+                policy = ReviewPolicyConfig(
+                    minDaysSinceFirstLaunch = 0.days
+                )
+            )
+        )
 
         lifecycleScope.launch {
             reviewPrompter.onAppLaunched()

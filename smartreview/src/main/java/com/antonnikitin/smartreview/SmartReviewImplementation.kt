@@ -8,8 +8,9 @@ import kotlinx.coroutines.tasks.await
 
 class SmartReviewImplementation(
     context: Context,
-    private val policy: ReviewPolicy = ReviewPolicy()
+    config: SmartReviewConfig = SmartReviewConfig()
 ) : ReviewPrompter {
+    private val policy: ReviewPolicy = ReviewPolicy(config.policy)
 
     private val appContext = context.applicationContext
     private val storage = ReviewStorage(appContext)
