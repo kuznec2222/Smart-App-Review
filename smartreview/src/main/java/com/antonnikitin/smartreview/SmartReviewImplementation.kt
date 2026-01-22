@@ -1,16 +1,19 @@
 package com.antonnikitin.smartreview
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
+import androidx.core.net.toUri
 
 class SmartReviewImplementation(
     context: Context,
-    config: SmartReviewConfig = SmartReviewConfig()
+    private val config: SmartReviewConfig = SmartReviewConfig()
 ) : ReviewPrompter {
     private val policy: ReviewPolicy = ReviewPolicy(config.policy)
 
@@ -70,19 +73,27 @@ class SmartReviewImplementation(
     }
 
     override suspend fun requestReview(activity: Activity): Boolean {
-        Log.d("SmartReview", "requestReview() called")
+        Log.d("SmartReview", "requestReview() called with launcher: ${config.launcher}")
+
+        return when (val launcher = config.launcher) {
+            ReviewLauncher.InApp -> requestInAppReview(activity)
+            is ReviewLauncher.PlayStore -> requestPlayStoreReview(activity, launcher.packageName)
+        }
+    }
+
+    private suspend fun requestInAppReview(activity: Activity): Boolean {
         return try {
-            Log.d("SmartReview", "requestReview → requesting ReviewManager")
+            Log.d("SmartReview", "InApp Review → requesting ReviewManager")
 
             val manager = ReviewManagerFactory.create(activity)
 
-            Log.d("SmartReview", "requestReview → requestReviewFlow()")
+            Log.d("SmartReview", "InApp Review → requestReviewFlow()")
             val reviewInfo = manager.requestReviewFlow().await()
 
-            Log.d("SmartReview", "requestReview → launchReviewFlow()")
+            Log.d("SmartReview", "InApp Review → launchReviewFlow()")
             manager.launchReviewFlow(activity, reviewInfo).await()
 
-            Log.d("SmartReview", "requestReview SUCCESS → applying optOut + cooldown")
+            Log.d("SmartReview", "InApp Review SUCCESS → applying optOut + cooldown")
             storage.markOptOut()
             storage.markPromptShown(now())
             _isReviewActive.value = false
@@ -90,9 +101,54 @@ class SmartReviewImplementation(
         } catch (e: Exception) {
             Log.d(
                 "SmartReview",
-                "requestReview FAILED → cooldown only, error=${e.javaClass.simpleName}: ${e.message}"
+                "InApp Review FAILED → cooldown only, error=${e.javaClass.simpleName}: ${e.message}"
             )
+            storage.markPromptShown(now())
+            false
+        }
+    }
 
+    private suspend fun requestPlayStoreReview(activity: Activity, packageName: String): Boolean {
+        return try {
+            Log.d("SmartReview", "PlayStore Review → opening for package: $packageName")
+
+            val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
+                data = "market://details?id=$packageName&showAllReviews=true".toUri()
+                setPackage("com.android.vending")
+            }
+
+            activity.startActivity(playStoreIntent)
+
+            Log.d("SmartReview", "PlayStore Review → opened successfully")
+
+            storage.markOptOut()
+            storage.markPromptShown(now())
+            _isReviewActive.value = false
+            true
+
+        } catch (_: ActivityNotFoundException) {
+            Log.d("SmartReview", "PlayStore app not found → trying browser")
+
+            return try {
+                val browserIntent = Intent(Intent.ACTION_VIEW).apply {
+                    data = "https://play.google.com/store/apps/details?id=$packageName&showAllReviews=true".toUri()
+                }
+                activity.startActivity(browserIntent)
+
+                Log.d("SmartReview", "PlayStore Review → opened in browser")
+
+                storage.markOptOut()
+                storage.markPromptShown(now())
+                _isReviewActive.value = false
+                true
+
+            } catch (e: Exception) {
+                Log.e("SmartReview", "PlayStore Review FAILED → ${e.javaClass.simpleName}: ${e.message}")
+                storage.markPromptShown(now())
+                false
+            }
+        } catch (e: Exception) {
+            Log.e("SmartReview", "PlayStore Review FAILED → ${e.javaClass.simpleName}: ${e.message}")
             storage.markPromptShown(now())
             false
         }

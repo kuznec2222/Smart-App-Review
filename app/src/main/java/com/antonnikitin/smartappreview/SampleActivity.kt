@@ -22,12 +22,14 @@ import com.antonnikitin.smartreview.ReviewInline
 import com.antonnikitin.smartreview.ReviewInlineBlock
 import com.antonnikitin.smartreview.ReviewInlineController
 import com.antonnikitin.smartreview.ReviewInlineStyle
+import com.antonnikitin.smartreview.ReviewLauncher
 import com.antonnikitin.smartreview.ReviewPolicyConfig
 import com.antonnikitin.smartreview.ReviewPrompter
 import com.antonnikitin.smartreview.ReviewStrings
 import com.antonnikitin.smartreview.ReviewUiAction
 import com.antonnikitin.smartreview.SmartReviewConfig
 import com.antonnikitin.smartreview.SmartReviewImplementation
+import com.antonnikitin.smartreview.playStore
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.days
 
@@ -39,6 +41,7 @@ class SampleActivity : ComponentActivity() {
         val reviewPrompter = SmartReviewImplementation(
             context = this,
             config = SmartReviewConfig(
+                launcher = ReviewLauncher.playStore(applicationContext),
                 policy = ReviewPolicyConfig(
                     minDaysSinceFirstLaunch = 0.days,
                     maxPassiveShows = 100
@@ -97,20 +100,29 @@ fun SampleScreen(
                 )
             )
         )
-        when {
-            willShowReview -> {
-                ReviewInline(
-                    reviewPrompter = reviewPrompter,
-                    activity = activity,
-                    strings = AppReviewStrings(LocalContext.current),
-                    style = customStyle,
-                    horizontalAlignment = Alignment.End
-                )
-            }
-            else -> {
-                Text("Admob Banner, etc.")
-            }
-        }
+
+        ReviewInline(
+            reviewPrompter = reviewPrompter,
+            activity = activity,
+            strings = AppReviewStrings(LocalContext.current),
+            style = customStyle,
+            horizontalAlignment = Alignment.End
+        )
+
+//        when {
+//            willShowReview -> {
+//                ReviewInline(
+//                    reviewPrompter = reviewPrompter,
+//                    activity = activity,
+//                    strings = AppReviewStrings(LocalContext.current),
+//                    style = customStyle,
+//                    horizontalAlignment = Alignment.End
+//                )
+//            }
+//            else -> {
+//                Text("Admob Banner, etc.")
+//            }
+//        }
 
         HorizontalDivider()
 

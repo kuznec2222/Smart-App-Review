@@ -25,12 +25,18 @@ class ReviewInlineController(
         Log.d(TAG, "shouldPrompt = $shouldShow")
 
         if (shouldShow) {
-            _step.value = ReviewStep.SENTIMENT
-            _uiState.value = ReviewUiState.Visible
-
-            // Только фиксируем пассивный показ
             reviewPrompter.markPassiveShown()
-            Log.d(TAG, "UI -> Visible, step = SENTIMENT (passive show recorded)")
+
+            val recheck = reviewPrompter.shouldPrompt()
+
+            if (recheck) {
+                _step.value = ReviewStep.SENTIMENT
+                _uiState.value = ReviewUiState.Visible
+                Log.d(TAG, "UI -> Visible, step = SENTIMENT")
+            } else {
+                _uiState.value = ReviewUiState.Hidden
+                Log.d(TAG, "UI -> Hidden (limit reached after increment)")
+            }
         } else {
             _uiState.value = ReviewUiState.Hidden
             Log.d(TAG, "UI -> Hidden")

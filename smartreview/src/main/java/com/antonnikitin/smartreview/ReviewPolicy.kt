@@ -56,3 +56,9 @@ class ReviewPolicy(
         return true
     }
 }
+
+sealed interface ReviewLauncher {
+    object InApp : ReviewLauncher
+    data class PlayStore(val packageName: String) : ReviewLauncher
+    companion object
+}
