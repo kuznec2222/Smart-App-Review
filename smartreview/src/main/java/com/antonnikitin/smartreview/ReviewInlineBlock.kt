@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -48,7 +49,8 @@ fun ReviewInlineBlock(
             ReviewStep.SENTIMENT -> {
                 Text(
                     text = strings.likeQuestion,
-                    style = style.titleTextStyle
+                    style = style.titleTextStyle,
+                    textAlign = horizontalAlignmentToTextAlign(horizontalAlignment)
                 )
 
                 Row(
@@ -81,7 +83,8 @@ fun ReviewInlineBlock(
             ReviewStep.ASK_REVIEW -> {
                 Text(
                     text = strings.rateQuestion,
-                    style = style.titleTextStyle
+                    style = style.titleTextStyle,
+                    textAlign = horizontalAlignmentToTextAlign(horizontalAlignment)
                 )
 
                 Row(
@@ -124,3 +127,11 @@ fun ReviewInlineBlock(
         }
     }
 }
+
+private fun horizontalAlignmentToTextAlign(horizontalAlignment: Alignment.Horizontal): TextAlign =
+    when (horizontalAlignment) {
+        Alignment.Start -> TextAlign.Start
+        Alignment.CenterHorizontally -> TextAlign.Center
+        Alignment.End -> TextAlign.End
+        else -> TextAlign.Start
+    }

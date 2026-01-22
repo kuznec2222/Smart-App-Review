@@ -3,22 +3,22 @@ package com.antonnikitin.smartreview
 object DefaultReviewStrings : ReviewStrings {
 
     override val likeQuestion =
-        "Do you like this app?"
+        "Are you enjoying the app?"
 
     override val likePositive =
-        "Yes"
+        "Sure!"
 
     override val likeNegative =
-        "No"
+        "Not really"
 
     override val rateQuestion =
-        "Would you like to rate it on Google Play?"
+        "We’d be truly grateful if you could leave a rating on Google Play"
 
     override val rateNow =
-        "Rate now"
+        "Rate app"
 
     override val rateLater =
-        "Later"
+        "Maybe later"
 
     override val rateNever =
         "No, thanks"

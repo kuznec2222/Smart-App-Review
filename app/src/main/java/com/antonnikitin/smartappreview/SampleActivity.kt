@@ -106,7 +106,7 @@ fun SampleScreen(
             activity = activity,
             strings = AppReviewStrings(LocalContext.current),
             style = customStyle,
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.Start
         )
 
 //        when {
